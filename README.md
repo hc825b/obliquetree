@@ -32,16 +32,16 @@ For example usage, API details, comparisons with axis-aligned trees, and in-dept
   Natively supports categorical columns with minimal preprocessing. Only label encoding is required, removing the need for extensive data transformation.
 
 - **Robust Handling of Missing Values**  
-  Automatically assigns `NaN` values to the optimal leaf for axis-aligned splits. For oblique splits, imputation ensures smooth operation.
+  Automatically assigns `NaN` values to the optimal leaf for axis-aligned splits.
 
 - **Customizable Tree Structures**  
-  Flexible API allows users to extend and tailor tree structures to implement specialized variants or novel splitting criteria.
+  The flexible API empowers users to design their own tree architectures easily.
 
 - **Exact Equivalence with `scikit-learn`**  
-  Guarantees results identical to `scikit-learn`'s decision trees when oblique and categorical splitting are disabled, ensuring compatibility for existing workflows.
+  Guarantees results identical to `scikit-learn`'s decision trees when oblique and categorical splitting are disabled.
 
 - **Optimized Performance**  
-  Outperforms `scikit-learn` in terms of speed and efficiency without compromising accuracy:
+  Outperforms `scikit-learn` in terms of speed and efficiency when oblique and categorical splitting are disabled:
   - Up to **40% faster** for datasets with float columns.
   - Up to **300% faster** for datasets with integer columns.
 
