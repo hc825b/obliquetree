@@ -1,6 +1,6 @@
 # Introduction
 
-`obliquetree` is an advanced decision tree implementation designed to provide high-performance and interpretable models. It supports both traditional and oblique splits, ensuring flexibility and improved generalization with shallow trees. This makes it a powerful alternative to regular decision trees, especially for datasets with high-dimensional or complex relationships.
+`obliquetree` is an advanced decision tree implementation designed to provide high-performance and interpretable models. It supports both traditional and oblique splits, ensuring flexibility and improved generalization with shallow trees. This makes it a powerful alternative to regular decision trees.
 
 ![Tree Visualization](_static/tree_visual.png)
 
@@ -27,17 +27,17 @@ pip install obliquetree
 - **Seamless Categorical Feature Handling**  
   Natively supports categorical columns with minimal preprocessing. Only label encoding is required, removing the need for extensive data transformation.
 
-- **Exact Equivalence with scikit-learn**  
-  Guarantees results identical to scikit-learn's decision trees when oblique and categorical splitting are disabled, ensuring compatibility for existing workflows.
-
 - **Robust Handling of Missing Values**  
   Automatically assigns `NaN` values to the optimal leaf for axis-aligned splits. For oblique splits, imputation ensures smooth operation.
 
 - **Customizable Tree Structures**  
   Flexible API allows users to extend and tailor tree structures to implement specialized variants or novel splitting criteria.
 
+- **Exact Equivalence with `scikit-learn`**  
+  Guarantees results identical to `scikit-learn`'s decision trees when oblique and categorical splitting are disabled, ensuring compatibility for existing workflows.
+
 - **Optimized Performance**  
-  Outperforms scikit-learn in terms of speed and efficiency without compromising accuracy:
+  Outperforms `scikit-learn` in terms of speed and efficiency without compromising accuracy:
   - Up to **40% faster** for datasets with float columns.
   - Up to **300% faster** for datasets with integer columns.
 
