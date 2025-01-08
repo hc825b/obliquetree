@@ -60,8 +60,7 @@ In very large trees (e.g., depth 20 or more), the performance of `obliquetree` m
 - **`n_pair` (int, default=2):**
   - The number of features to consider for oblique splits.
   - All possible combinations of `n_pair` features from the continuous feature set are tested.
-  - **Example:** If there are 20 continuous features and `n_pair=3`, the algorithm will evaluate $\binom{20}{3}$ combinations.
-  - **Recommendation:** Use small values like 2, 3, or the total number of continuous features minus a small number. Large values can lead to computational challenges due to the combinatorial explosion.
+  - **Example:** If there are 20 continuous features and `n_pair=2`, the algorithm will evaluate $\binom{20}{2}$ combinations.
 
 - **`gamma` (float, default=1.0):**
   - Controls the separation strength in oblique splits.
