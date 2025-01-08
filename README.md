@@ -1,4 +1,4 @@
-# Introduction
+# obliquetree
 
 `obliquetree` is an advanced decision tree implementation designed to provide high-performance and interpretable models. It supports both traditional and oblique splits, ensuring flexibility and improved generalization with shallow trees. This makes it a powerful alternative to regular decision trees.
 
@@ -14,7 +14,7 @@ pip install obliquetree
 -----
 
 ## Documentation
-For more detailed information about the API and advanced usage, please refer to the full  [documentation](https://obliquetree.readthedocs.io/en/latest/).
+For example usage, API details, comparisons with axis-aligned trees, and in-depth insights into the algorithmic foundation, we **strongly recommend** referring to the full [documentation](https://obliquetree.readthedocs.io/en/latest/).
 
 ---
 ## **Key Features**
