@@ -38,8 +38,8 @@ pip install obliquetree
 
 - **Optimized Performance**  
   Outperforms `scikit-learn` in terms of speed and efficiency when oblique and categorical splitting are disabled:
-  - Up to **40% faster** for datasets with float columns.
-  - Up to **300% faster** for datasets with integer columns.
+  - Up to **50% faster** for datasets with float columns.
+  - Up to **200% faster** for datasets with integer columns.
 
   ![Performance Comparison (Float)](_static/sklearn_perf/performance_comparison_float.png)
 
