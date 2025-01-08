@@ -1,8 +1,9 @@
 # Getting Started
 
-`obliquetree` is a versatile Python library for building decision trees. It supports both **regression** and **binary/multiclass classification** tasks. Unlike traditional decision tree libraries, `obliquetree` offers the flexibility to use **oblique splits**, which involve linear combinations of features, as well as **traditional axis-aligned splits**. 
 
-`obliquetree` combines advanced capabilities with efficient performance. It supports **oblique splits**, leveraging **L-BFGS optimization** to determine the best linear weights for splits, ensuring both speed and accuracy. The library also handles **categorical features**, making it suitable for datasets with mixed data types. Even when used in its **traditional mode**, without oblique splits, `obliquetree` outperforms scikit-learn in terms of speed and adds support for categorical variables, providing a significant advantage over many traditional decision tree implementations.
+`obliquetree` combines advanced capabilities with efficient performance. It supports **oblique splits**, leveraging **L-BFGS optimization** to determine the best linear weights for splits, ensuring both speed and accuracy. The library also handles **categorical features**, making it suitable for datasets with mixed data types. Even when used in its **traditional mode**, without oblique splits, `obliquetree` outperforms `scikit-learn` in terms of speed and adds support for categorical variables, providing a significant advantage over many traditional decision tree implementations.
+
+When the **oblique feature** is enabled, `obliquetree` dynamically selects the optimal split type between oblique and traditional splits. If no weights can be found to reduce impurity, it defaults to an **axis-aligned split**, ensuring robustness and adaptability in various scenarios.
 
 In very large trees (e.g., depth 20 or more), the performance of `obliquetree` may converge closely with **traditional trees**. The true strength of `obliquetree` lies in their ability to perform exceptionally well at **shallower depths**, offering improved generalization with fewer splits. Moreover, thanks to linear projections, `obliquetree` significantly outperform traditional trees when working with datasets that exhibit **linear relationships**.
 
