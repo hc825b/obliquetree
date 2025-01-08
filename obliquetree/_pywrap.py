@@ -453,11 +453,11 @@ class Classifier(BaseTree):
         relative_change: float = 0.001,
     ):
         """
-        A decision tree classifier that supports both traditional and oblique splits.
+        A decision tree classifier supporting both traditional axis-aligned and oblique splits.
 
-        This classifier implements decision tree classification with the option to use
-        either traditional axis-aligned splits or oblique splits. Oblique splits allow
-        for linear combinations of features when making split decisions.
+        This advanced decision tree classifier extends traditional regression trees by supporting oblique
+        splits (linear combinations of features) alongside conventional axis-aligned splits. It offers enhanced
+        flexibility in modeling continuous outputs while maintaining the interpretability of decision trees.
 
         Parameters
         ----------
