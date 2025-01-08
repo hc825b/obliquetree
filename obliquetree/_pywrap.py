@@ -727,4 +727,4 @@ class Regressor(BaseTree):
         y : array-like of shape (n_samples,)
             The predicted values.
         """
-        return super().predict(X)
+        return super().predict(X).ravel()
