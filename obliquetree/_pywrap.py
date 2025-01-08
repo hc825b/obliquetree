@@ -9,8 +9,8 @@ from math import comb
 import warnings
 
 
-def formatwarning(msg, *args, kwargs):
-    return f"UserWarning: {msg}\n"
+def formatwarning(message, category, filename, lineno, line=None, **kwargs):
+    return f"UserWarning: {message}\n"
 
 
 warnings.formatwarning = formatwarning
@@ -254,8 +254,11 @@ class BaseTree(TreeClassifier):
                 raise ValueError("categories must be None or a list/tuple of integers")
             if not all(isinstance(x, int) for x in categories):
                 raise ValueError("All elements in categories must be integers")
+            if any(x < 0 for x in categories):
+                raise ValueError("All elements in categories must be non-negative integers")
             return list(categories)
         return []
+
 
     def _validate_use_oblique(self, use_oblique: bool) -> bool:
         if not isinstance(use_oblique, bool):
@@ -371,7 +374,15 @@ class BaseTree(TreeClassifier):
         )
 
         if self.categories:
-            if self.n_pair > max_possible_pairs:
+            if max_possible_pairs < 2:
+                warnings.warn(
+                    f"Total features: {X.shape[1]}, categorical features: {len(self.categories)}. "
+                    f"The number of possible feature pairs ({max_possible_pairs}) is less than 2. "
+                    f"As a result, 'use_oblique' set 'False'."
+                )
+                self.use_oblique = False
+
+            elif self.n_pair > max_possible_pairs:
                 warnings.warn(
                     f"Total features: {X.shape[1]}, categorical features: {len(self.categories)}. "
                     f"n_pair ({self.n_pair}) exceeds the usable features, adjusting n_pair to {max_possible_pairs}."
@@ -395,10 +406,17 @@ class BaseTree(TreeClassifier):
     def _validate_categories_in_data(self, X: NDArray) -> None:
         if self.categories:
             for col_idx in self.categories:
+                # Kategori indeksi matris boyutlarını aşmamalı
                 if col_idx >= X.shape[1]:
                     raise ValueError(
-                        f"Category column index {col_idx} exceeds X dimensions ({X.shape[1]} features)"
+                        f"Category column index {col_idx} exceeds X dimensions ({X.shape[1]} features)."
                     )
+            
+            # Kategorik sütunlardaki değerler negatif olmamalı
+            if (X[:, self.categories] < 0).any():
+                raise ValueError(
+                    "X contains negative values in the specified category columns, which are not allowed."
+                )
 
     def _warn_large_combinations(self, n_features: int) -> None:
         total_combinations = comb(n_features, self.n_pair)
