@@ -51,7 +51,7 @@ In the `"tree"` structure, you have the flexibility to include optional properti
 ### 1. Axis-Aligned Split Node
 
 For a feature index $i$ and threshold $t$:
-- **Decision function**: $f(x) = x[i] <= t$
+- **Decision function**: $f(x) = x[i] \leq t$
 - **Traversal logic**:
   - Go to the **left child** if $f(x)$ is true.
   - Go to the **right child** if $f(x)$ is false.
@@ -79,7 +79,7 @@ For a feature index $i$ and threshold $t$:
 ### 2. Oblique Split Node
 
 For a weight vector $w \in \mathbb{R}^k$ and feature indices $F = \{f_1, \dots, f_k\}$:
-- **Decision function**: $f(x) = \sum_i (w_i \cdot x[f_i]) < t$
+- **Decision function**: $f(x) = \sum_i (w_i \cdot x[f_i]) \leq t$
 - **Traversal logic**:
   - Go to the **left child** if $f(x)$ is true.
   - Go to the **right child** if $f(x)$ is false.
