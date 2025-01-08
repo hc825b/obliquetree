@@ -1,0 +1,42 @@
+[project]
+name = "obliquetree"
+version = "1.0"
+
+dependencies = [
+    "numpy>=2.2.1",
+    "scipy>=1.15.0"
+]
+authors = [
+    { name = "Samet Copur", email = "sametcopur@yahoo.com" },
+]
+description = "Traditional and Oblique Decision Tree"
+readme = "README.md"
+license = {text = "BSD 3-Clause License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = [
+    "python",
+    "data-science",
+    "machine-learning",
+    "machine-learning-library",
+    "explainable-ai",
+    "decision-tree",
+    "oblique-tree"
+]
+
+requires-python = ">=3.9"
+
+[project.urls]
+Documentation = "https://obliquetree.readthedocs.io/en/latest/"
+Repository = "https://github.com/sametcopur/obliquetree"
+Tracker = "https://github.com/sametcopur/obliquetree/issues"
+
+[tool.cibuildwheel]
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+
+[build-system]
+requires = ["setuptools", "wheel", "Cython", "numpy"]
+build-backend = "setuptools.build_meta"
