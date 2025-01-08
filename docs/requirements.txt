@@ -3,4 +3,4 @@ scipy>=1.15.0
 sphinx_rtd_theme
 sphinx_autodoc_typehints
 furo
-myst_parser
+myst-parser
