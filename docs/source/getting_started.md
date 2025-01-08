@@ -1,7 +1,9 @@
 # Getting Started
 
 
-`obliquetree` combines advanced capabilities with efficient performance. It supports **oblique splits**, leveraging **L-BFGS optimization** to determine the best linear weights for splits, ensuring both speed and accuracy. The library also handles **categorical features**, making it suitable for datasets with mixed data types. Even when used in its **traditional mode**, without oblique splits, `obliquetree` outperforms `scikit-learn` in terms of speed and adds support for categorical variables, providing a significant advantage over many traditional decision tree implementations.
+`obliquetree` combines advanced capabilities with efficient performance. It supports **oblique splits**, leveraging **L-BFGS optimization** to determine the best linear weights for splits, ensuring both speed and accuracy. The library also handles **categorical features**, making it suitable for datasets with mixed data types. 
+
+In **traditional mode**, without oblique splits, `obliquetree` outperforms `scikit-learn` in terms of speed and adds support for categorical variables, providing a significant advantage over many traditional decision tree implementations.
 
 When the **oblique feature** is enabled, `obliquetree` dynamically selects the optimal split type between oblique and traditional splits. If no weights can be found to reduce impurity, it defaults to an **axis-aligned split**, ensuring robustness and adaptability in various scenarios.
 
