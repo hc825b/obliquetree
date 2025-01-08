@@ -560,7 +560,7 @@ class Classifier(BaseTree):
 
         Returns
         -------
-        y : ndarray of shape (n_samples,)
+        y : array-like of shape (n_samples,)
             The predicted values.
         """
         return np.argmax(super().predict(X), axis=1)
@@ -576,7 +576,7 @@ class Classifier(BaseTree):
 
         Returns
         -------
-        proba : ndarray of shape (n_samples, n_classes)
+        proba : array-like of shape (n_samples, n_classes)
             The class probabilities of the input samples.
         """
         return super().predict(X)
@@ -706,7 +706,7 @@ class Regressor(BaseTree):
 
         Returns
         -------
-        y : ndarray of shape (n_samples,)
+        y : array-like of shape (n_samples,)
             The predicted values.
         """
         return super().predict(X).ravel()
