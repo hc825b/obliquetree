@@ -62,7 +62,7 @@ napoleon_use_ivar = False
 napoleon_use_rtype = False
 
 
-autodoc_typehints = 'description' 
+autodoc_typehints = "none"
 autodoc_member_order = "bysource"
 
 templates_path = ["_templates"]
