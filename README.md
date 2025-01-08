@@ -18,7 +18,7 @@ pip install obliquetree
 For example usage, API details, comparisons with axis-aligned trees, and in-depth insights into the algorithmic foundation, we **strongly recommend** referring to the full [documentation](https://obliquetree.readthedocs.io/en/latest/).
 
 ---
-## **Key Features**
+## Key Features
 
 - **Oblique Splits**  
   Perform oblique splits using linear combinations of features to capture complex patterns in data. Supports both linear and soft decision tree objectives for flexible and accurate modeling.

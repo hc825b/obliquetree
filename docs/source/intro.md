@@ -13,7 +13,7 @@ pip install obliquetree
 ```
 -----
 
-## **Key Features**
+## Key Features
 
 - **Oblique Splits**  
   Perform oblique splits using linear combinations of features to capture complex patterns in data. Supports both linear and soft decision tree objectives for flexible and accurate modeling.
