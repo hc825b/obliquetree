@@ -187,7 +187,6 @@ Here is a complete example combining all split types:
         "weights": [-1.0, 0.5],
         "features": [0, 1],
         "threshold": 0.0,
-        "missing_go_left": true,
         "left": {
             "is_leaf": false,
             "is_oblique": false,
