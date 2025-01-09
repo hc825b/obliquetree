@@ -255,10 +255,11 @@ class BaseTree(TreeClassifier):
             if not all(isinstance(x, int) for x in categories):
                 raise ValueError("All elements in categories must be integers")
             if any(x < 0 for x in categories):
-                raise ValueError("All elements in categories must be non-negative integers")
+                raise ValueError(
+                    "All elements in categories must be non-negative integers"
+                )
             return list(categories)
         return []
-
 
     def _validate_use_oblique(self, use_oblique: bool) -> bool:
         if not isinstance(use_oblique, bool):
@@ -292,6 +293,16 @@ class BaseTree(TreeClassifier):
         """
         X = np.asarray(X, order="F", dtype=np.float64)
         y = np.asarray(y, order="C", dtype=np.float64)
+
+        if X.ndim != 2:
+            raise ValueError(
+                f"Expected a 2D array for input samples, but got an array with {X.ndim} dimensions."
+            )
+
+        if X.shape[0] != y.shape[0]:
+            raise ValueError(
+                f"The number of samples in `X` ({X.shape[0]}) does not match the number of target values in `y` ({y.shape[0]})."
+            )
 
         # Validate target vector
         self._validate_target(y)
@@ -411,7 +422,7 @@ class BaseTree(TreeClassifier):
                     raise ValueError(
                         f"Category column index {col_idx} exceeds X dimensions ({X.shape[1]} features)."
                     )
-            
+
             # Kategorik sütunlardaki değerler negatif olmamalı
             if (X[:, self.categories] < 0).any():
                 raise ValueError(
@@ -451,6 +462,12 @@ class BaseTree(TreeClassifier):
             )
 
         X = np.asarray(X, order="F", dtype=np.float64)
+
+        if X.ndim != 2:
+            raise ValueError(
+                f"Expected a 2D array for input samples, but got an array with {X.ndim} dimensions. "
+            )
+
         return super().predict(X)
 
 

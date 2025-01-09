@@ -6,6 +6,7 @@ import json
 from typing import Optional, Dict, Any, List, Union
 from io import BytesIO
 import os
+import numpy as np
 
 
 def load_tree(tree_data: Union[str, Dict]) -> Union[Classifier, Regressor]:
@@ -329,6 +330,361 @@ def visualize_tree(
         savefig(save_path, dpi=dpi, bbox_inches="tight", pad_inches=0)
 
     show()
+    
+def export_tree_to_onnx(tree: Union[Classifier, Regressor]) -> None:
+    """
+    Convert an oblique decision tree (Classifier or Regressor) into an ONNX model.
+
+    .. important::
+       - This implementation currently does **not** support batch processing.
+         Only a single row (1D NumPy array) and np.float64 dtype can be passed as input.
+       - The input variable name must be **"X"** and its shape should be (n_features,).
+       - In binary classification, the output is a single-dimensional value representing 
+         the probability of belonging to the positive class.
+
+    Parameters
+    ----------
+    tree : Union[Classifier, Regressor]
+        The oblique decision tree (classifier or regressor) to be converted to ONNX.
+
+    Returns
+    -------
+    onnx.ModelProto
+        The constructed ONNX model.
+
+    Examples
+    --------
+    >>> # Suppose we have a 2D NumPy array X of shape (num_samples, num_features).
+    >>> # We only take a single row for prediction:
+    >>> X_sample = X[0, :]
+    >>> 
+    >>> # Create an inference session using onnxruntime:
+    >>> import onnxruntime
+    >>> session = onnxruntime.InferenceSession("tree.onnx")
+    >>> 
+    >>> # Retrieve the output name of the model
+    >>> out_name = session.get_outputs()[0].name
+    >>> 
+    >>> # Perform inference on the sample
+    >>> y_pred = session.run([out_name], {"X": X_sample})[0]
+    >>> print(y_pred)
+    """
+    try:
+        from onnx import helper, TensorProto
+    except ImportError as e:
+        raise ImportError(
+            "Failed to import onnx dependencies. Please make sure the 'onnx' "
+            "package is installed."
+        ) from e
+    
+    tree_dict = export_tree(tree)
+
+    # Closure for unique name generation
+    name_counter = [0]
+
+    def _unique_name(prefix="Node"):
+        name_counter[0] += 1
+        return f"{prefix}_{name_counter[0]}"
+
+    def _make_constant_int_node(name, value, shape=None):
+        """
+        Creates an ONNX Constant node containing int64 data.
+        Useful for indices in Gather or other integer-only parameters.
+        """
+        if shape is None:
+            shape = [len(value)] if isinstance(value, list) else []
+        arr = (
+            np.array(value, dtype=np.int64)
+            if isinstance(value, list)
+            else (
+                np.array([value], dtype=np.int64)
+                if shape == []
+                else np.array(value, dtype=np.int64)
+            )
+        )
+
+        const_tensor = helper.make_tensor(
+            name=_unique_name("const_data_int"),
+            data_type=TensorProto.INT64,
+            dims=arr.shape,
+            vals=arr.flatten().tolist(),
+        )
+
+        node = helper.make_node(
+            "Constant", inputs=[], outputs=[name], value=const_tensor
+        )
+        return node
+
+    def _make_constant_float_node(name, value, shape=None):
+        """
+        Creates an ONNX Constant node containing float64 data.
+        Useful for thresholds, weights, etc.
+        """
+        if shape is None:
+            shape = [len(value)] if isinstance(value, list) else []
+        arr = (
+            np.array(value, dtype=np.float64)
+            if isinstance(value, list)
+            else np.array([value], dtype=np.float64)
+        )
+
+        if shape and arr.shape != tuple(shape):
+            arr = arr.reshape(shape)
+
+        const_tensor = helper.make_tensor(
+            name=_unique_name("const_data_float"),
+            data_type=TensorProto.DOUBLE,
+            dims=arr.shape,
+            vals=arr.flatten().tolist(),
+        )
+        node = helper.make_node(
+            "Constant", inputs=[], outputs=[name], value=const_tensor
+        )
+        return node
+
+    def _build_subgraph_for_node(node_dict, n_classes):
+        """
+        Recursively builds a subgraph (for 'If' branches) from the given node definition.
+        The subgraph uses 'X' as an outer-scope input (not declared in inputs[]).
+        """
+        nodes = []
+        graph_name = _unique_name("SubGraph")
+
+        # Subgraph output
+        out_name = _unique_name("sub_out")
+        out_info = helper.make_tensor_value_info(out_name, TensorProto.DOUBLE, None)
+
+        # Reference to 'X' from the outer scope
+        x_info = helper.make_tensor_value_info("X", TensorProto.DOUBLE, [None])
+
+        # If this is a leaf node
+        if node_dict["is_leaf"]:
+            if "values" in node_dict and isinstance(node_dict["values"], list):
+                # Multi-class leaf
+                val_array = node_dict["values"]
+                shape = [len(val_array)]
+                cnode = _make_constant_float_node(out_name, val_array, shape)
+                nodes.append(cnode)
+            else:
+                # Single-value leaf (binary or regression)
+                val = node_dict["value"]
+                cnode = _make_constant_float_node(out_name, val, [])
+                nodes.append(cnode)
+
+            subgraph = helper.make_graph(
+                nodes=nodes,
+                name=graph_name,
+                inputs=[],
+                outputs=[out_info],
+                value_info=[x_info],
+            )
+            return subgraph, out_name
+
+        # Otherwise, this node is a split
+        cond_name = _unique_name("cond_bool")
+        is_oblique = node_dict.get("is_oblique", False)
+        cat_list = node_dict.get("category_left", [])
+        n_category = len(cat_list)
+
+        # Oblique split
+        if is_oblique:
+            w_list = node_dict["weights"]
+            f_list = node_dict["features"]
+            thr_val = node_dict["threshold"]
+
+            partials = []
+            for w, f_idx in zip(w_list, f_list):
+                gather_idx = _make_constant_int_node(
+                    _unique_name("gather_idx"), [f_idx], [1]
+                )
+                nodes.append(gather_idx)
+
+                gather_out = _unique_name("gather_out")
+                gnode = helper.make_node(
+                    "Gather",
+                    inputs=["X", gather_idx.output[0]],
+                    outputs=[gather_out],
+                    axis=0,
+                )
+                nodes.append(gnode)
+
+                w_node = _make_constant_float_node(_unique_name("weight"), w, [])
+                nodes.append(w_node)
+
+                mul_out = _unique_name("mul_out")
+                mul_node = helper.make_node(
+                    "Mul", inputs=[gather_out, w_node.output[0]], outputs=[mul_out]
+                )
+                nodes.append(mul_node)
+                partials.append(mul_out)
+
+            # Summation of partial products
+            if len(partials) == 1:
+                final_dot = partials[0]
+            else:
+                tmp = partials[0]
+                for p in partials[1:]:
+                    add_out = _unique_name("add_out")
+                    add_node = helper.make_node(
+                        "Add", inputs=[tmp, p], outputs=[add_out]
+                    )
+                    nodes.append(add_node)
+                    tmp = add_out
+                final_dot = tmp
+
+            thr_node = _make_constant_float_node(_unique_name("thr"), thr_val, [])
+            nodes.append(thr_node)
+
+            less_node = helper.make_node(
+                "Less", inputs=[final_dot, thr_node.output[0]], outputs=[cond_name]
+            )
+            nodes.append(less_node)
+
+        # Categorical split
+        elif n_category > 0:
+            f_idx = node_dict["feature_idx"]
+            fnode = _make_constant_int_node(_unique_name("catf_idx"), [f_idx], [1])
+            nodes.append(fnode)
+
+            gout = _unique_name("cat_gather_out")
+            gnode = helper.make_node(
+                "Gather", inputs=["X", fnode.output[0]], outputs=[gout], axis=0
+            )
+            nodes.append(gnode)
+
+            eq_outputs = []
+            for c_val in cat_list:
+                cat_node = _make_constant_float_node(_unique_name("cat_val"), c_val, [])
+                nodes.append(cat_node)
+
+                eq_out = _unique_name("eq_out")
+                eq_node = helper.make_node(
+                    "Equal", inputs=[gout, cat_node.output[0]], outputs=[eq_out]
+                )
+                nodes.append(eq_node)
+                eq_outputs.append(eq_out)
+
+            if len(eq_outputs) == 1:
+                final_eq = eq_outputs[0]
+            else:
+                tmp = eq_outputs[0]
+                for eqo in eq_outputs[1:]:
+                    or_out = _unique_name("or_out")
+                    or_node = helper.make_node(
+                        "Or", inputs=[tmp, eqo], outputs=[or_out]
+                    )
+                    nodes.append(or_node)
+                    tmp = or_out
+                final_eq = tmp
+
+            id_node = helper.make_node(
+                "Identity", inputs=[final_eq], outputs=[cond_name]
+            )
+            nodes.append(id_node)
+
+        # Axis-aligned numeric split
+        else:
+            f_idx = node_dict["feature_idx"]
+            thr_val = node_dict["threshold"]
+
+            fnode = _make_constant_int_node(_unique_name("f_idx"), [f_idx], [1])
+            nodes.append(fnode)
+
+            gout = _unique_name("gather_out")
+            gnode = helper.make_node(
+                "Gather", inputs=["X", fnode.output[0]], outputs=[gout], axis=0
+            )
+            nodes.append(gnode)
+
+            thr_node = _make_constant_float_node(_unique_name("thr_val"), thr_val, [])
+            nodes.append(thr_node)
+
+            less_node = helper.make_node(
+                "Less", inputs=[gout, thr_node.output[0]], outputs=[cond_name]
+            )
+            nodes.append(less_node)
+
+        # Recursively build subgraphs for left and right
+        left_sub, left_out = _build_subgraph_for_node(node_dict["left"], n_classes)
+        right_sub, right_out = _build_subgraph_for_node(node_dict["right"], n_classes)
+
+        if_out = _unique_name("if_out")
+        if_info = helper.make_tensor_value_info(if_out, TensorProto.DOUBLE, None)
+
+        if_node = helper.make_node(
+            "If",
+            inputs=[cond_name],
+            outputs=[if_out],
+            name=_unique_name("IfNode"),
+            then_branch=left_sub,
+            else_branch=right_sub,
+        )
+        nodes.append(if_node)
+
+        subgraph = helper.make_graph(
+            nodes=nodes,
+            name=graph_name,
+            inputs=[],
+            outputs=[if_info],
+            value_info=[x_info],
+        )
+        return subgraph, if_out
+
+    # Retrieve tree parameters
+    params = tree_dict["params"]
+    n_classes = params.get("n_classes", 2)
+    n_features = params.get("n_features", 4)
+
+    # Build the root subgraph from the tree
+    root_subgraph, root_out_name = _build_subgraph_for_node(
+        tree_dict["tree"], n_classes
+    )
+
+    # Main graph I/O
+    main_input = helper.make_tensor_value_info("X", TensorProto.DOUBLE, [n_features])
+    main_output = helper.make_tensor_value_info("Y", TensorProto.DOUBLE, None)
+
+    # Extract nodes and value_info from the root subgraph
+    nodes = list(root_subgraph.node)
+    val_info = list(root_subgraph.value_info)
+    if_out_name = root_subgraph.output[0].name
+
+    # Add a final Identity node to map subgraph output to "Y"
+    final_out_node_name = _unique_name("final_y")
+    identity_node = helper.make_node(
+        "Identity", inputs=[if_out_name], outputs=[final_out_node_name]
+    )
+    nodes.append(identity_node)
+    main_output.name = final_out_node_name
+
+    # Construct the main graph
+    main_graph = helper.make_graph(
+        nodes=nodes,
+        name="MainGraph",
+        inputs=[main_input],
+        outputs=[main_output],
+        value_info=val_info,
+    )
+
+    # Fix output shape to [1] or [n_classes]
+    if n_classes > 2:
+        dim = main_graph.output[0].type.tensor_type.shape.dim.add()
+        dim.dim_value = n_classes
+    else:
+        dim = main_graph.output[0].type.tensor_type.shape.dim.add()
+        dim.dim_value = 1
+
+    # Fix input shape to [n_features]
+    main_graph.input[0].type.tensor_type.shape.dim[0].dim_value = n_features
+
+    onnx_model = helper.make_model(
+        main_graph,
+        producer_name="custom_oblique_categorical_tree",
+        opset_imports=[helper.make_opsetid("", 13)],
+    )
+    onnx_model.ir_version = 7
+
+    return onnx_model
 
 
 def _format_float(value: float) -> str:
