@@ -11,7 +11,7 @@ authors = [
 ]
 description = "Traditional and Oblique Decision Tree"
 readme = "README.md"
-license = {text = "BSD 3-Clause License"}
+license = {text = "MIT License"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -38,5 +38,5 @@ Tracker = "https://github.com/sametcopur/obliquetree/issues"
 build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
 
 [build-system]
-requires = ["setuptools", "wheel", "Cython", "numpy"]
+requires = ["setuptools", "wheel", "Cython", "numpy>=2.2.1", "scipy>=1.15.0"]
 build-backend = "setuptools.build_meta"
