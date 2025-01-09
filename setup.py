@@ -3,39 +3,29 @@ from Cython.Build import cythonize
 import numpy as np
 from setuptools.extension import Extension
 import sys
-
-if sys.platform == "win32":
-    extra_compile_args = [
-        "/O2",
-        "/fp:fast",
-        "/Ot",
-        "/Ox",
-        "/Oi",
-        "/GT",
-    ]
-    extra_link_args = ["/OPT:REF", "/OPT:ICF"]
-
-elif sys.platform == "linux":
-    extra_compile_args = [
-        "-O3",
-        "-funroll-loops",
-        "-ftree-vectorize",
-        "-fstrict-aliasing",
-        "-fstack-protector-strong",
-    ]
-    extra_link_args = []
-
-elif sys.platform == "darwin":  # macOS
-    extra_compile_args = [
-        "-O3",
-        "-funroll-loops",
-        "-ftree-vectorize",
-        "-fstrict-aliasing",
-        "-fstack-protector-strong",
-        "-Wno-unreachable-code-fallthrough",
-        "-std=c++17",
-    ]
-    extra_link_args = []
+if sys.platform in ("win32", "linux", "darwin"):  # All platforms
+    if sys.platform == "win32":
+        extra_compile_args = [
+            "/O2",            # Equivalent to -O3
+            "/fp:fast",       # Fast floating point model
+            "/Ot",           # Favor fast code
+            "/Ox",           # Maximum optimization
+            "/Oi",           # Enable intrinsic functions
+            "/GT",           # Fiber-safe optimizations
+            "/std:c++17"     # C++17 standard
+        ]
+        extra_link_args = ["/OPT:REF", "/OPT:ICF"]
+    else:  # linux and darwin (macOS)
+        extra_compile_args = [
+            "-O3",                             # Maximum optimization
+            "-funroll-loops",                  # Loop unrolling
+            "-ftree-vectorize",                # Enable vectorization
+            "-fstrict-aliasing",               # Enable strict aliasing
+            "-fstack-protector-strong",        # Stack protection
+            "-Wno-unreachable-code-fallthrough",  # Ignore unreachable code warnings
+            "-std=c++17"                       # C++17 standard
+        ]
+        extra_link_args = []
 
 extensions = [
     Extension(
