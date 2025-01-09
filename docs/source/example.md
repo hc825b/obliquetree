@@ -48,7 +48,7 @@ Scaling is important for oblique splits. Since `obliquetree` supports categorica
 
 ---
 
-## Example 1: Oblique Tree with Default Settings
+## Example 1: Oblique Tree with Categorical Support
 
 ```python
 clf = Classifier(
