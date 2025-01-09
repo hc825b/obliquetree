@@ -28,83 +28,74 @@ if sys.platform in ("win32", "linux", "darwin"):  # All platforms
         ]
         extra_link_args = []
 
+define_macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+include_dirs = [np.get_include()]
+
 
 extensions = [
     Extension(
         "obliquetree.src.tree",
         ["obliquetree/src/tree.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
         "obliquetree.src.oblique",
         ["obliquetree/src/oblique.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
         "obliquetree.src.base",
         ["obliquetree/src/base.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
         "obliquetree.src.utils",
         ["obliquetree/src/utils.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
         "obliquetree.src.metric",
         ["obliquetree/src/metric.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
         "obliquetree.src.ccp",
         ["obliquetree/src/ccp.pyx"],
-        include_dirs=[np.get_include()],
-        define_macros=[
-            ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")
-        ],  # Disable deprecated API
-        extra_compile_args=extra_compile_args,  # Optimization flag
-        language="c++",  # Use C++ language
+        include_dirs=include_dirs,
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
 ]
 
 setup(
     name="obliquetree",
+    packages=["obliquetree", "obliquetree.src"],  # Explicitly list packages
     ext_modules=cythonize(
         extensions,
         compiler_directives={
-            "language_level": 3,  # Python 3 dil seviyesi
-            "boundscheck": False,  # Dizi sınırı kontrolü kapalı
-            "wraparound": False,  # Negatif indeks kontrolü kapalı
-            "initializedcheck": False,  # Başlatılmamış değişken kontrolü kapalı
-            "cdivision": True,  # C tarzı bölme işlemleri
+            "language_level": 3,
+            "boundscheck": False,
+            "wraparound": False,
+            "initializedcheck": False,
+            "cdivision": True,
             "nonecheck": False,
             "overflowcheck": False,
-            # "infer_types":True,
         },
     ),
 )
