@@ -25,27 +25,26 @@ To install `obliquetree`, use the following pip command:
 pip install obliquetree
 ```
 
-Using the `obliquetree` library is simple and intuitive. Here's an example of how you can utilize the library for both classification and regression tasks:
+Using the `obliquetree` library is simple and intuitive. Here's a more generic example that works for both classification and regression:
 
 
 ```python
-from obliquetree import Classifier
-# from obliquetree import Regressor 
+from obliquetree import Classifier, Regressor
 
-# Initialize the classifier with desired parameters
-clf = Classifier(
+# Initialize the model (Classifier or Regressor)
+model = Classifier(  # Replace "Classifier" with "Regressor" if performing regression
     use_oblique=True,       # Enable oblique splits
     max_depth=2,            # Set the maximum depth of the tree
     n_pair=2,               # Number of feature pairs for optimization
     random_state=42,        # Set a random state for reproducibility
-    categories=[0, 10, 32], # Indicate which features are categorical
+    categories=[0, 10, 32], # Specify which features are categorical
 )
 
 # Train the model on the training dataset
-clf.fit(X_train, y_train)
+model.fit(X_train, y_train)
 
 # Predict on the test dataset
-y_pred = clf.predict(X_test)
+y_pred = model.predict(X_test)
 ```
 -----
 
