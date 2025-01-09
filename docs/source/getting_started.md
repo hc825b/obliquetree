@@ -96,3 +96,7 @@ The `n_pair` parameter is critical for oblique splits. It defines how many featu
 
 Avoid setting `n_pair` to produce high number of combinations, as the computational cost grows rapidly and can make the algorithm impractical for large feature sets.
 ```
+
+```{important}
+While oblique splits based on linear projections aren't affected by the random state, the **soft decision tree method** in `obliquetree` can be highly sensitive to the **initial weights**. This sensitivity arises from the structure of the loss function and gradients being minimized during optimization. As a result **different random states** can lead to significantly different results.
+```
