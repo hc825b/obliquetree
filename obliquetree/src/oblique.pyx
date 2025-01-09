@@ -596,7 +596,6 @@ cdef my_lbfgs_b_minimize(
     double factr_ = 1e7,   # L-BFGS-B param
     double pgtol = 1e-5,  # L-BFGS-B param
     int m = 10,           # L-BFGS-B memory
-    int iprint = -1,
     int maxls = 20):
     """
     Çok basit bir L-BFGS-B döngüsü. 'fun_and_grad_nogil' fonksiyonunu
@@ -624,18 +623,13 @@ cdef my_lbfgs_b_minimize(
     cdef double f_old = INFINITY
 
     # Fortran setulb() icin char array
-    cdef np.ndarray[np.uint8_t, ndim=1] task = np.zeros(60, dtype=np.uint8)
-    cdef np.ndarray[np.uint8_t, ndim=1] csave = np.zeros(60, dtype=np.uint8)
+    cdef np.ndarray[int, ndim=1] task = np.zeros(2, dtype=np.int32)
+    cdef np.ndarray[int, ndim=1] ln_task = np.zeros(2, dtype=np.int32)
 
     # lsave(4), isave(44), dsave(29)
     cdef np.ndarray[int, ndim=1] lsave = np.zeros(4,   dtype=np.int32)
     cdef np.ndarray[int, ndim=1] isave = np.zeros(44,  dtype=np.int32)
     cdef np.ndarray[double, ndim=1] dsave = np.zeros(29, dtype=np.float64)
-
-    strncpy(<char*> &task[0], b"START", 5)
-
-    cdef bytes task_bytes
-    cdef bytes tstrip
 
     # L-BFGS-B iterasyon döngüsü:
     for i in range(maxiter):
@@ -644,13 +638,9 @@ cdef my_lbfgs_b_minimize(
                   f_val, grad_w,
                   factr, pgtol,
                   wa, iwa,
-                  task, iprint, csave, lsave, isave, dsave, maxls)
+                  task, lsave, isave, dsave, maxls, ln_task)
 
-
-        task_bytes = task.tobytes()  # b'START\x00\x00...'
-        tstrip = task_bytes.rstrip(b'\x00')
-
-        if tstrip.startswith(b"FG"):
+        if task[0] == 3:
 
             if task_ == 0:
                 if linear:
@@ -683,7 +673,10 @@ cdef my_lbfgs_b_minimize(
 
             f_old = f_val
 
-        if tstrip.startswith(b'CONV'):
+        elif task[0] == 1:
+            continue
+
+        else:
             break
 
     return x0, f_val
@@ -773,7 +766,7 @@ cdef tuple[double*, int*] analyze(
 
     cdef np.ndarray[double, ndim=1] lower_bnd = np.zeros(n_pair, dtype=np.float64)
     cdef np.ndarray[double, ndim=1] upper_bnd = np.zeros(n_pair, dtype=np.float64)
-    cdef np.ndarray[int, ndim=1] nbd = np.zeros(n_pair, dtype=_lbfgsb.types.intvar.dtype)
+    cdef np.ndarray[int, ndim=1] nbd = np.zeros(n_pair, dtype=np.int32)
 
     cdef tuple best_pair_py 
     cdef np.ndarray[double, ndim=1] best_x_py
