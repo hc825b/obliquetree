@@ -5,12 +5,47 @@
 
 ![Tree Visualization](docs/source/_static/tree_visual.png)
 
------
-## Installation 
-To install `obliquetree`, use the following pip command:
 
+----
+
+## Getting Started
+
+`obliquetree` combines advanced capabilities with efficient performance. It supports **oblique splits**, leveraging **L-BFGS optimization** to determine the best linear weights for splits, ensuring both speed and accuracy.
+
+In **traditional mode**, without oblique splits, `obliquetree` outperforms `scikit-learn` in terms of speed and adds support for **categorical variables**, providing a significant advantage over many traditional decision tree implementations.
+
+When the **oblique feature** is enabled, `obliquetree` dynamically selects the optimal split type between oblique and traditional splits. If no weights can be found to reduce impurity, it defaults to an **axis-aligned split**, ensuring robustness and adaptability in various scenarios.
+
+In very large trees (e.g., depth 20 or more), the performance of `obliquetree` may converge closely with **traditional trees**. The true strength of `obliquetree` lies in their ability to perform exceptionally well at **shallower depths**, offering improved generalization with fewer splits. Moreover, thanks to linear projections, `obliquetree` significantly outperform traditional trees when working with datasets that exhibit **linear relationships**.
+
+-----
+## Installation
+To install `obliquetree`, use the following pip command:
 ```bash
 pip install obliquetree
+```
+
+Using the `obliquetree` library is simple and intuitive. Here's an example of how you can utilize the library for both classification and regression tasks:
+
+
+```python
+from obliquetree import Classifier
+# from obliquetree import Regressor 
+
+# Initialize the classifier with desired parameters
+clf = Classifier(
+    use_oblique=True,       # Enable oblique splits
+    max_depth=2,            # Set the maximum depth of the tree
+    n_pair=2,               # Number of feature pairs for optimization
+    random_state=42,        # Set a random state for reproducibility
+    categories=[0, 10, 32], # Indicate which features are categorical
+)
+
+# Train the model on the training dataset
+clf.fit(X_train, y_train)
+
+# Predict on the test dataset
+y_pred = clf.predict(X_test)
 ```
 -----
 
