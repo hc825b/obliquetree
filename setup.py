@@ -18,7 +18,6 @@ if sys.platform == "win32":
 elif sys.platform == "linux":
     extra_compile_args = [
         "-O3",
-        "-ffast-math",
         "-funroll-loops",
         "-ftree-vectorize",
         "-fstrict-aliasing",
@@ -29,7 +28,6 @@ elif sys.platform == "linux":
 elif sys.platform == "darwin":  # macOS
     extra_compile_args = [
         "-O3",
-        #"-ffast-math",
         "-funroll-loops",
         "-ftree-vectorize",
         "-fstrict-aliasing",
