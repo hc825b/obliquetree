@@ -546,7 +546,7 @@ class Classifier(BaseTree):
         )
 
     def fit(
-        self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[NDArray] = None
+        self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None
     ) -> "Classifier":
         """
         Build a decision tree classifier from the training set (X, y).
@@ -557,7 +557,7 @@ class Classifier(BaseTree):
             The training input samples.
         y : array-like of shape (n_samples,)
             Target values (class labels).
-        sample_weight : ndarray of shape (n_samples,), default=None
+        sample_weight : array-like of shape (n_samples,), default=None
             Sample weights.
 
         Returns
@@ -578,7 +578,7 @@ class Classifier(BaseTree):
 
         Returns
         -------
-        y : array-like of shape (n_samples,)
+        y : NDArray of shape (n_samples,)
             The predicted values.
         """
         return np.argmax(super().predict(X), axis=1)
@@ -594,7 +594,7 @@ class Classifier(BaseTree):
 
         Returns
         -------
-        proba : array-like of shape (n_samples, n_classes)
+        proba : NDArray of shape (n_samples, n_classes)
             The class probabilities of the input samples.
         """
         return super().predict(X)
@@ -692,7 +692,7 @@ class Regressor(BaseTree):
         )
 
     def fit(
-        self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[NDArray] = None
+        self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None
     ) -> "Regressor":
         """
         Build a decision tree regressor from the training set (X, y).
@@ -724,7 +724,7 @@ class Regressor(BaseTree):
 
         Returns
         -------
-        y : array-like of shape (n_samples,)
+        y : NDArray of shape (n_samples,)
             The predicted values.
         """
         return super().predict(X).ravel()
