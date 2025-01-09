@@ -23,7 +23,6 @@ if sys.platform in ("win32", "linux", "darwin"):  # All platforms
             "-ftree-vectorize",  # Enable vectorization
             "-fstrict-aliasing",  # Enable strict aliasing
             "-fstack-protector-strong",  # Stack protection
-            "-Wno-unreachable-code-fallthrough",  # Ignore unreachable code warnings
             "-std=c++17",  # C++17 standard
         ]
         extra_link_args = []
