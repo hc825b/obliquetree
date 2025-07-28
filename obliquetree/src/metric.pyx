@@ -941,6 +941,8 @@ cdef double find_best_split_for_categorical_multiclass(
             if best_stats == NULL:
                 with gil:
                     raise MemoryError()
+            # Initialize
+            memcpy(best_stats, stats, unique_count * sizeof(CategoryStat))
 
             # Tüm permütasyonları üret
             perm_orders = generate_permutations(n_classes, &perm_count)
@@ -996,21 +998,27 @@ cdef double find_best_split_for_categorical_multiclass(
         free(total_class_weights)
         free(nan_class_weights)
 
-        free(stats_count)
-        free(new_indices)
-        free(best_stats)
+        if stats_count != NULL:
+            free(stats_count)
+        if new_indices != NULL:
+            free(new_indices)
+        if best_stats != NULL:
+            free(best_stats)
         
         # class_weights belleklerini serbest bırak
-        for i in range(unique_count):
-            if stats[i].class_weights != NULL:
-                free(stats[i].class_weights)
+        if stats != NULL:
+            for i in range(unique_count):
+                if stats[i].class_weights != NULL:
+                    free(stats[i].class_weights)
+                    stats[i].class_weights = NULL
 
         # permütasyon belleklerini serbest bırak
-        for i in range(perm_count):
-            if perm_orders[i] != NULL:
-                free(perm_orders[i])
-        free(perm_orders)
-    
+        if perm_orders != NULL:
+            for i in range(perm_count):
+                if perm_orders[i] != NULL:
+                    free(perm_orders[i])
+            free(perm_orders)
+
     return best_impurity
 
 
